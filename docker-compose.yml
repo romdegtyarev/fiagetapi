@@ -1,0 +1,13 @@
+version: "3.3"
+
+services:
+  fia_get:
+    build:
+      context: /home/rom/apps/fia_get/
+    container_name: fia_get
+    restart: always
+    user: 1000:985
+    volumes:
+      - /home/rom/apps/fia_get/:/home/fia/fia/fia_get
+    command: sh -c "/home/fia/pyvenv/bin/python3 /home/fia/fia/fia_get/main.py"
+
