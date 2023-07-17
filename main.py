@@ -31,6 +31,7 @@ SCHEDULED_TASK_SYNCHRONIZATION_INTERVAL = 240  # Min
 GROUP_CHAT_ID = config.chat_id
 TOKEN = config.token
 
+logger = logging.getLogger('main_logging')
 
 ################################################################################
 # Functions
@@ -49,7 +50,7 @@ def send_photo(file_name, chat_id):
     # TODO: Check
     url = TELEGRAM_BOT_API + TOKEN + TELEGRAM_BOT_API_SEND_PHOTO_METHOD + "chat_id=" + chat_id
     r = requests.post(url, files={'photo': image})
-    print("send_photo: result: ", r.text)
+    logger.info("send_photo: result: ", r.text)
 
 
 ################################################################################
@@ -87,7 +88,7 @@ def download_pdf(url, file_name, headers):
         with open(file_name, "wb") as f:
             f.write(response.content)
     else:
-        print("download_pdf: ", response.status_code)
+        logger.info("download_pdf: ", response.status_code)
 
 
 ################################################################################
@@ -149,7 +150,7 @@ def cmp_with_local_database(site_dates, site_links):
         site_database_link_str = j
         site_database_date_object = datetime.datetime.strptime(site_database_date_str, format)
         if local_database_date_object < site_database_date_object:
-            print("cmp_with_local_database: add_to_local_database")
+            logger.info("cmp_with_local_database: add_to_local_database")
             add_to_local_database(site_database_date_str, site_database_link_str)
 
 
@@ -161,7 +162,7 @@ def update_info_from_site():
     """
     Update info from site
     """
-    print("update_info_from_site: start")
+    logger.info("update_info_from_site: start")
     url = FIA_URL_DOCS
     # TODO: Check response
     response = requests.get(url)
@@ -186,7 +187,7 @@ def update_info_from_site():
         result_links.append(docs_race_link_str)
         result_dates.append(docs_race_date_str)
 
-    # print("update_info_from_site: dates: ", result_dates, "links: ", result_links)
+    #logger.info("update_info_from_site: dates: ", result_dates, "links: ", result_links)
     cmp_with_local_database(result_dates, result_links)
 
 
@@ -199,9 +200,9 @@ def scheduled_task():
     Scheduled task
     """
     schedule.every(SCHEDULED_TASK_SYNCHRONIZATION_INTERVAL).minutes.do(update_info_from_site)
-    print("scheduled_task: Start")
+    logger.info("scheduled_task: Start")
     while True:
-        print("scheduled_task: while")
+        logger.info("scheduled_task: while")
         schedule.run_pending()
         time.sleep(SCHEDULED_TASK_DELAY)
 
@@ -218,13 +219,10 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     logging.basicConfig(encoding='utf-8')
 
-    logger = logging.getLogger('main_logging')
     logger.setLevel(logging.DEBUG)
     logger.debug("Starting FIA GET BOT")
     logger.info("Starting FIA GET BOT")
-
-    print("Starting FIA GET BOT")
-    #scheduled_task()
+    scheduled_task()
 
 
 if __name__ == "__main__":
