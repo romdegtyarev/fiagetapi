@@ -4,6 +4,8 @@ import requests
 import datetime
 import schedule
 import time
+import logging
+import logging.config
 from pdf2image import convert_from_path
 from datetime import date
 from bs4 import BeautifulSoup
@@ -211,8 +213,18 @@ def main():
     """
     Main
     """
+    logging.basicConfig(format='%(asctime)s %(message)s')
+    logging.basicConfig(filename='log.log')
+    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(encoding='utf-8')
+
+    logger = logging.getLogger('main_logging')
+    logger.setLevel(logging.DEBUG)
+    logger.debug("Starting FIA GET BOT")
+    logger.info("Starting FIA GET BOT")
+
     print("Starting FIA GET BOT")
-    scheduled_task()
+    #scheduled_task()
 
 
 if __name__ == "__main__":
