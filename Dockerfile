@@ -1,17 +1,10 @@
-FROM ubuntu:18.04
+FROM python
 
 ENV USER_ID            1000
 ENV GROUP_ID           985
 ENV USER_GROUP_NAME    fia
 
 RUN apt-get update && apt-get install -y \
-    python \
-    python3 \
-    python3-venv \
-    python-pip \
-    poppler-utils \
-    python-poppler \
-    libpoppler-cpp-dev \
     vim \
     sudo
 
