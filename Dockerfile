@@ -1,27 +1,18 @@
-FROM python
+# Use the official Python image
+FROM python:3.9-slim
 
-ENV USER_ID            1000
-ENV GROUP_ID           985
-ENV USER_GROUP_NAME    fia
+# Set the working directory
+WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    vim \
-    sudo
+# Copy project files into the container
+COPY requirements.txt .
+COPY main.py .
+COPY .env .
+RUN chmod +x /app/main.py
 
-RUN ln -fs /ust/share/zoneinfo/Asia/Novosibirsk /etc/localtime
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN groupadd -g $GROUP_ID $USER_GROUP_NAME
-RUN useradd -u $USER_ID -g $GROUP_ID -m $USER_GROUP_NAME
-
-RUN mkdir -p /home/fia/pyvenv
-RUN python3 -m venv /home/fia/pyvenv
-RUN /home/fia/pyvenv/bin/python3 -m pip install --upgrade pip
-RUN /home/fia/pyvenv/bin/pip3 install schedule
-RUN /home/fia/pyvenv/bin/pip3 install beautifulsoup4
-RUN /home/fia/pyvenv/bin/pip3 install pdf2image
-RUN /home/fia/pyvenv/bin/pip3 install requests
-
-RUN mkdir -p /home/fia/fia
-RUN chown -R $USER_GROUP_NAME:$USER_GROUP_NAME /home/fia/fia
-RUN chmod -R 777 /home/fia/fia
+# Specify the command to run the application
+CMD ["python", "main.py"]
 

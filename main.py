@@ -1,229 +1,84 @@
-################################################################################
-################################################################################
+import os
 import requests
-import datetime
-import schedule
 import time
 import logging
-import logging.config
-from pdf2image import convert_from_path
-from datetime import date
+import schedule
+import hashlib
+import sys
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 
-import config
+# Load environment variables
+load_dotenv()
 
-################################################################################
-# Main variables
-################################################################################
-FIA_URL = "https://www.fia.com/"
-FIA_URL_DOCS = "https://www.fia.com/documents/season/season-2023-2042/championships/fia-formula-one-world-championship-14"
-RACE_TEMPLATE = "Final Race Classification"
-GRID_TEMPLATE = "Final Starting Grid"
+# Constants
+FIA_URL = os.getenv("FIA_URL")
+GROUP_CHAT_ID = os.getenv("GROUP_CHAT_ID")
+CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", 5))  # Minutes
+SLEEP_INTERVAL = int(os.getenv("SLEEP_INTERVAL", 60))  # Seconds
 
-TELEGRAM_BOT_API = "https://api.telegram.org/bot"
-TELEGRAM_BOT_API_SEND_PHOTO_METHOD = "/sendPhoto?"
+TELEGRAM_BOT_API = f"https://api.telegram.org/bot{os.getenv('TOKEN')}/sendMessage"
 
-# Config
-DATABASE_PATH = "/home/fia/fia/fia_get/db/"
-DATABASE_NAME = "/home/fia/fia/fia_get/local_database"
-SCHEDULED_TASK_DELAY = 60  # Sec
-SCHEDULED_TASK_SYNCHRONIZATION_INTERVAL = 240  # Min
-GROUP_CHAT_ID = config.chat_id
-TOKEN = config.token
+# Logging configuration
+logging.basicConfig(format="%(asctime)s %(message)s", level=logging.DEBUG, handlers=[logging.StreamHandler(sys.stdout)], encoding='utf-8')
+#logging.basicConfig(format='%(asctime)s %(message)s', filename='fia_bot.log', level=logging.INFO, encoding='utf-8')
+logger = logging.getLogger('fia_bot')
 
-logger = logging.getLogger('main_logging')
+# Store last known hash value
+LAST_HASH = None
 
-################################################################################
-# Functions
-################################################################################
-################################################################################
-# name:        
-# description: 
-################################################################################
-def send_photo(file_name, chat_id):
-    """
+def make_request(url):
+    """Send a GET request to the FIA website."""
+    try:
+        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+        response.raise_for_status()
+        return response.text
+    except requests.RequestException as e:
+        logger.error(f"make_request: Request failed: {e}")
+        return None
 
-    :param file_name:
-    :param chat_id:
-    """
-    image = open(file_name, "rb")
-    # TODO: Check
-    url = TELEGRAM_BOT_API + TOKEN + TELEGRAM_BOT_API_SEND_PHOTO_METHOD + "chat_id=" + chat_id
-    r = requests.post(url, files={'photo': image})
-    logger.info("send_photo: result: ", r.text)
+def send_telegram_message(text):
+    """Send a message to the Telegram group."""
+    try:
+        response = requests.post(TELEGRAM_BOT_API, data={"chat_id": GROUP_CHAT_ID, "text": text})
+        logger.info(f"send_telegram_message: Message sent: {text}, Telegram response: {response.text}")
+    except requests.RequestException as e:
+        logger.error(f"send_telegram_message: Failed to send message to Telegram: {e}")
 
+def get_page_hash(html):
+    """Generate a hash of the page content."""
+    return hashlib.md5(html.encode("utf-8")).hexdigest()
 
-################################################################################
-# name:        
-# description: 
-################################################################################
-def convert_save_send_image(in_file_name, out_file_name, page):
-    """
+def check_for_new_results():
+    """Check the FIA website for updates using a hash-based comparison."""
+    global LAST_HASH
 
-    :param in_file_name:
-    :param out_file_name:
-    :param page:
-    """
-    images = convert_from_path(in_file_name)
-    image_name = DATABASE_PATH + out_file_name + '.jpg'
-    images[page].save(image_name, 'JPEG')
-    send_photo(image_name, GROUP_CHAT_ID)
+    logger.info("check_for_new_results: Checking FIA website for updates")
+    html = make_request(FIA_URL)
+    if not html:
+        return
 
+    page_hash = get_page_hash(html)
 
-################################################################################
-# name:        
-# description: 
-################################################################################
-def download_pdf(url, file_name, headers):
-    """
+    if LAST_HASH is None:
+        LAST_HASH = page_hash
+        logger.info("check_for_new_results: Initial page hash stored")
+        return
 
-    :param url:
-    :param file_name:
-    :param headers:
-    """
-    # Send GET request
-    response = requests.get(url, headers=headers)
-    # Save the PDF
-    if response.status_code == 200:
-        with open(file_name, "wb") as f:
-            f.write(response.content)
-    else:
-        logger.info("download_pdf: ", response.status_code)
+    if page_hash != LAST_HASH:
+        LAST_HASH = page_hash
+        send_telegram_message(f"🆕 FIA website has been updated: {FIA_URL}")
+        logger.info("check_for_new_results: Website content changed. Notification sent")
 
-
-################################################################################
-# name:        
-# description: 
-################################################################################
-def add_to_local_database(site_dates, site_links):
-    """
-
-    :param site_dates:
-    :param site_links:
-    """
-    pdf_url = FIA_URL + site_links
-    pdf_file_name = DATABASE_PATH + site_dates + ".pdf"
-    download_pdf(pdf_url, pdf_file_name, "")
-    # TODO: Result
-
-    local_database = open(DATABASE_NAME, "a")
-    # TODO: Check result
-    local_database.write(str(site_dates) + "\n")
-    local_database.close()
-
-    convert_save_send_image(pdf_file_name, site_dates, 1)
-
-
-################################################################################
-# name:        
-# description: 
-################################################################################
-def cmp_with_local_database(site_dates, site_links):
-    """
-
-    :param site_dates:
-    :param site_links:
-    """
-    # TODO: Check site_dates len
-    local_database = open(DATABASE_NAME, "r")
-    # TODO: Check if opened
-    local_database_dates = []
-    while True:
-        line = local_database.readline()
-        if not line:
-            break
-        local_database_dates.append(line.strip())
-    local_database.close
-
-    # Get last date
-    format = "%d.%m.%y %H:%M"
-    count = len(local_database_dates)
-    local_database_date_str = "01.01.01 00:00"
-    if count > 0:
-        local_database_date_str = local_database_dates[len(local_database_dates) - 1]
-    local_database_date_object = datetime.datetime.strptime(local_database_date_str, format)
-
-    site_dates.reverse()
-    site_links.reverse()
-    for i, j in zip(site_dates, site_links):
-        site_database_date_str = i
-        site_database_link_str = j
-        site_database_date_object = datetime.datetime.strptime(site_database_date_str, format)
-        if local_database_date_object < site_database_date_object:
-            logger.info("cmp_with_local_database: add_to_local_database")
-            add_to_local_database(site_database_date_str, site_database_link_str)
-
-
-################################################################################
-# name:        update_info_from_site
-# description: 
-################################################################################
-def update_info_from_site():
-    """
-    Update info from site
-    """
-    logger.info("update_info_from_site: start")
-    url = FIA_URL_DOCS
-    # TODO: Check response
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
-    docs = soup.find_all("li", "document-row")
-
-    result_links = []
-    result_dates = []
-    for i in docs:
-        if not RACE_TEMPLATE in i.text:
-            if GRID_TEMPLATE not in i.text:
-                continue
-        docs_race_link_with_tags = i.find("a")
-        docs_race_link = docs_race_link_with_tags.get("href")
-
-        docs_race_date_with_tag = docs_race_link_with_tags.find("div", "published")
-        docs_race_date = docs_race_date_with_tag.find("span", "date-display-single")
-
-        docs_race_link_str = str(docs_race_link)
-        docs_race_date_str = str(docs_race_date.text)
-
-        result_links.append(docs_race_link_str)
-        result_dates.append(docs_race_date_str)
-
-    #logger.info("update_info_from_site: dates: ", result_dates, "links: ", result_links)
-    cmp_with_local_database(result_dates, result_links)
-
-
-################################################################################
-# name:        scheduled_task
-# description: Task for scheduled routine
-################################################################################
 def scheduled_task():
-    """
-    Scheduled task
-    """
-    schedule.every(SCHEDULED_TASK_SYNCHRONIZATION_INTERVAL).minutes.do(update_info_from_site)
-    logger.info("scheduled_task: Start")
+    """Schedule the task to run at a fixed interval."""
+    schedule.every(CHECK_INTERVAL).minutes.do(check_for_new_results)
+    logger.info("scheduled_task: Monitoring started, interval: %d minutes", CHECK_INTERVAL)
+
     while True:
-        logger.info("scheduled_task: while")
         schedule.run_pending()
-        time.sleep(SCHEDULED_TASK_DELAY)
-
-
-################################################################################
-# Main
-################################################################################
-def main():
-    """
-    Main
-    """
-    logging.basicConfig(format='%(asctime)s %(message)s')
-    logging.basicConfig(filename='log.log')
-    logging.basicConfig(level=logging.DEBUG)
-    logging.basicConfig(encoding='utf-8')
-
-    logger.setLevel(logging.DEBUG)
-    logger.debug("Starting FIA GET BOT")
-    logger.info("Starting FIA GET BOT")
-    scheduled_task()
-
+        time.sleep(SLEEP_INTERVAL)
 
 if __name__ == "__main__":
-    main()
+    logger.info("Starting FIA monitoring bot...")
+    scheduled_task()

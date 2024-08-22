@@ -5,4 +5,6 @@
 *.jpg
 *.pdf
 .idea
+.env
 
+/log.log

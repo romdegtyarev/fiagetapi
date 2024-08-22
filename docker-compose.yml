@@ -1,13 +1,11 @@
-version: "3.3"
+version: '3.8'
 
 services:
-  fia_get:
+  fiagetapi:
     build:
-      context: /home/rom/apps/fiagetapi/
+      context: .
     container_name: fiagetapi
     restart: always
-    user: 1000:985
-    volumes:
-      - /home/rom/apps/fiagetapi/:/home/fia/fia/fiagetapi
-    command: sh -c "/home/fia/pyvenv/bin/python3 /home/fia/fia/fiagetapi/main.py"
-
+    env_file:
+      - .env
+    command: python main.py
