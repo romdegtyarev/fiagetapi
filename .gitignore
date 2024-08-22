@@ -1,8 +1,28 @@
-/config.py
-/__pycache__/
-/local_database
-/.project
-*.jpg
-*.pdf
-.idea
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
 
+# === Editor / IDE ===
+.idea/
+.vscode/
+.project
+.pydevproject
+
+# === Environment / Config ===
+.env
+
+# === Cache / Local Data ===
+fastf1_cache/
+data/
+
+# === System files ===
+.DS_Store
+Thumbs.db
+
+# === Logs / Output ===
+log.log
+*.log
+*.pdf
+*.jpg

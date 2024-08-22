@@ -1,0 +1,29 @@
+# === Python cache ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# === Git ===
+.git
+.gitignore
+
+# === Editors / IDEs ===
+.vscode/
+.idea/
+.project
+.pydevproject
+
+# === Environment / Secrets ===
+.env
+
+# === Local/Generated Data ===
+data/
+fastf1_cache/
+*.log
+*.jpg
+*.pdf
+
+# === OS/system files ===
+.DS_Store
+Thumbs.db
