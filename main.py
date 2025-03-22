@@ -26,6 +26,7 @@ logger = logging.getLogger('fia_bot')
 
 # Store last known hash value
 LAST_HASH = None
+LAST_PAGE_CONTENT = None
 
 def make_request(url):
     """Send a GET request to the FIA website."""
@@ -52,6 +53,7 @@ def get_page_hash(html):
 def check_for_new_results():
     """Check the FIA website for updates using a hash-based comparison."""
     global LAST_HASH
+    global LAST_PAGE_CONTENT
 
     logger.info("check_for_new_results: Checking FIA website for updates")
     html = make_request(FIA_URL)
@@ -59,6 +61,7 @@ def check_for_new_results():
         return
 
     page_hash = get_page_hash(html)
+    logger.info(f"check_for_new_results: Last hash: {LAST_HASH}, Current hash: {page_hash}")
 
     if LAST_HASH is None:
         LAST_HASH = page_hash
@@ -69,6 +72,18 @@ def check_for_new_results():
         LAST_HASH = page_hash
         send_telegram_message(f"🆕 FIA website has been updated: {FIA_URL}")
         logger.info("check_for_new_results: Website content changed. Notification sent")
+        soup = BeautifulSoup(response.text, "html.parser")
+        new_page_content = soup.prettify()
+        if LAST_PAGE_CONTENT:
+            diff = difflib.unified_diff(
+                LAST_PAGE_CONTENT.splitlines(), 
+                new_page_content.splitlines(), 
+                lineterm=""
+            )
+            diff_text = "\n".join(diff)
+            if diff_text:
+                logger.info("Differences found:\n" + diff_text)
+        LAST_PAGE_CONTENT = new_page_content
 
 def scheduled_task():
     """Schedule the task to run at a fixed interval."""
