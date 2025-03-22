@@ -72,12 +72,12 @@ def check_for_new_results():
         LAST_HASH = page_hash
         send_telegram_message(f"🆕 FIA website has been updated: {FIA_URL}")
         logger.info("check_for_new_results: Website content changed. Notification sent")
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(html, "html.parser")
         new_page_content = soup.prettify()
         if LAST_PAGE_CONTENT:
             diff = difflib.unified_diff(
-                LAST_PAGE_CONTENT.splitlines(), 
-                new_page_content.splitlines(), 
+                LAST_PAGE_CONTENT.splitlines(),
+                new_page_content.splitlines(),
                 lineterm=""
             )
             diff_text = "\n".join(diff)
