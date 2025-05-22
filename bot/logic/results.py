@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 
+
 def generate_results_image(session):
     results = session.results
-    fig, ax = plt.subplots(figsize=(6, len(results)*0.4))
+    fig, ax = plt.subplots(figsize=(6, len(results) * 0.4))
     ax.axis('off')
     table = ax.table(
         cellText=results[['Position', 'FullName', 'TeamName', 'GridPosition', 'Points', 'Status']].values,

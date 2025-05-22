@@ -1,9 +1,0 @@
-version: '3.8'
-services:
-  fastf1-bot:
-    build: .
-    env_file:
-      - .env
-    volumes:
-      - ./data:/app/data
-    restart: unless-stopped

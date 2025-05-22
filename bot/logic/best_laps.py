@@ -1,6 +1,11 @@
 import matplotlib.pyplot as plt
 
 
+def print_best_laps(session):
+    laps = session.laps.pick_quicklaps()
+    print(laps.sort_values(by='LapTime')[['Driver', 'LapTime']].head())
+
+
 def generate_best_laps_image(session):
     laps = session.laps.pick_quicklaps().sort_values(by='LapTime')
     fig, ax = plt.subplots()
@@ -15,8 +20,3 @@ def generate_best_laps_image(session):
     path = "data/best_laps.png"
     fig.savefig(path)
     return path
-
-
-def print_best_laps(session):
-    laps = session.laps.pick_quicklaps()
-    print(laps.sort_values(by='LapTime')[['Driver', 'LapTime']].head())
