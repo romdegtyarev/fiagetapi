@@ -1,11 +1,9 @@
 version: '3.8'
-
 services:
-  fiagetapi:
-    build:
-      context: .
-    container_name: fiagetapi
-    restart: always
+  fastf1-bot:
+    build: .
     env_file:
       - .env
-    command: python main.py
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
