@@ -19,7 +19,7 @@ def main():
     parser.add_argument("--results", action="store_true", help="Display results and save image")
     parser.add_argument("--summary", action="store_true", help="Display session summary")
 
-    args = parser.parse_args(
+    args = parser.parse_args()
 
     try:
         session = load_session(args.year, args.gp, args.type.upper())
