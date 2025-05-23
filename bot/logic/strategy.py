@@ -1,7 +1,5 @@
 import os
 import matplotlib.pyplot as plt
-import pandas as pd
-import fastf1
 from fastf1 import plotting
 
 
@@ -32,7 +30,7 @@ def generate_strategy_image(session) -> str:
             previous_stint_end += row["StintLength"]
 
     # Legend
-    ax.legend(handles=[plt.Rectangle((0,0),1,1,color=color) for color in plotting.COMPOUND_COLORS.values()],
+    ax.legend(handles=[plt.Rectangle((0, 0), 1, 1, color=color) for color in plotting.COMPOUND_COLORS.values()],
               labels=plotting.COMPOUND_COLORS.keys(),
               title="Compound",
               bbox_to_anchor=(1.05, 1),

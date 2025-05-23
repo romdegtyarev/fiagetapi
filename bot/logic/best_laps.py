@@ -1,8 +1,6 @@
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
-import pandas as pd
-import fastf1
 from fastf1 import plotting
 
 
@@ -85,7 +83,7 @@ def generate_laptime_distribution_image(session) -> str:
 
     # Legend
     ax.legend()
-    ax.set_title(f"🏁 Lap Time Distribution")
+    ax.set_title("🏁 Lap Time Distribution")
     ax.set_xlabel("Driver")
     ax.set_ylabel("Lap Time, seconds")
 

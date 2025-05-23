@@ -19,8 +19,8 @@ def main():
     parser.add_argument("--best-laps", action="store_true", help="Display best laps and save image")
     parser.add_argument("--results", action="store_true", help="Display results and save image")
     parser.add_argument("--position-changes", action="store_true", help="Display position changes graph")
-    parser.add_argument("--strategy", action="store_true", help="Display ")  #TODO
-    parser.add_argument("--driver-styling", action="store_true", help="Display ")  #TODO
+    parser.add_argument("--strategy", action="store_true", help="Display tire strategy graph")
+    parser.add_argument("--driver-styling", action="store_true", help="Display driver lap performance by compound")
     parser.add_argument("--driver", type=str, help="Driver abbreviation, e.g., LEC")
 
     args = parser.parse_args()
@@ -28,7 +28,7 @@ def main():
     try:
         session = load_session(args.year, args.gp, args.type.upper())
     except Exception as e:
-        print(f"❌ Filed to load session: {e}")
+        print(f"❌ Failed to load session: {e}")
         return
 
     if args.best_laps:
@@ -36,6 +36,8 @@ def main():
             print_best_laps(session)
             path = generate_best_laps_image(session)
             print(f"📈 Best laps chart saved to: {path}")
+            path = generate_laptime_distribution_image
+            print(f"📈 Laptime distribution saved to: {path}")
         except Exception as e:
             print(f"❌ Error generating best laps chart: {e}")
 
@@ -47,19 +49,19 @@ def main():
         except Exception as e:
             print(f"❌ Error processing session results: {e}")
 
-   if args.position_changes:
+    if args.position_changes:
         try:
             path = generate_position_changes_image(session)
             print(f"📈 Position changes graph saved to: {path}")
         except Exception as e:
             print(f"❌ Error generating position changes graph: {e}")
 
-    if args.strategy
+    if args.strategy:
         try:
             path = generate_strategy_image(session)
-            print(f"📈 Test graph saved to: {path}") #TODO
+            print(f"📈 Tire strategy graph saved to: {path}")
         except Exception as e:
-            print(f"❌ Error: {e}") #TODO
+            print(f"❌ Error generating tire strategy graph: {e}")
 
     if args.driver_styling:
         if not args.driver:

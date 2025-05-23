@@ -13,7 +13,7 @@ def print_results(session):
         print("⚠ No session results available.")
         return
 
-    print(f"\n🏁 Session Results:\n")
+    print("\n🏁 Session Results:\n")
     for _, row in results.iterrows():
         print(f"{row['Position']:>2}. {row['FullName']:<20} ({row['TeamName']}) — Grid: {row['GridPosition']}, Points: {row['Points']}, Status: {row['Status']}")
 

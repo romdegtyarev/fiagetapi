@@ -1,6 +1,5 @@
 import os
 import matplotlib.pyplot as plt
-import fastf1
 from fastf1 import plotting
 
 
