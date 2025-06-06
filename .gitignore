@@ -16,6 +16,7 @@ __pycache__/
 # === Cache / Local Data ===
 fastf1_cache/
 data/
+postgresdata/
 
 # === System files ===
 .DS_Store
