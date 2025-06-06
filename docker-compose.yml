@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  racepagebotdb:
+    image: postgres:16-alpine
+    container_name: racepagebotdb
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  racepagebottg:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: racepagebottg
+    restart: unless-stopped
+    depends_on:
+      - racepagebotdb
+    volumes:
+      - ./data:/app/data
+      - ./fastf1_cache:/root/.cache/fastf1
+    env_file:
+      - .env
+
+volumes:
+  postgresdata:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './postgresdata'
