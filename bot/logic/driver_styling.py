@@ -15,7 +15,7 @@ def generate_driver_styling_image(session, driver_abbr: str) -> str:
     plt.style.use('dark_background')
     plotting.setup_mpl(misc_mpl_mods=False, color_scheme='fastf1')
 
-    driver_laps = session.laps.pick_drivers(driver_abbr).pick_quicklaps()
+    driver_laps = session.laps.pick_drivers(driver_abbr).pick_quicklaps().copy()
     if driver_laps.empty:
         print(f"⚠ No lap data available for driver {driver_abbr}.")
         return None

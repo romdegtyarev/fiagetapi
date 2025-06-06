@@ -68,7 +68,8 @@ def generate_results_image(session) -> str:
     cell_width = 2.0
 
     fig_width = n_cols * cell_width
-    fig_height = max(4, n_rows * cell_height * 0.9)
+    fig_height = max(4.5, n_rows * cell_height * 0.95)
+
     plt.style.use('dark_background')
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     ax.axis('off')

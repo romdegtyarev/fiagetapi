@@ -63,7 +63,7 @@ def generate_laptime_distribution_image(session) -> str:
     :param session: A FastF1 session object.
     :return: Path to the saved image.
     """
-    laps = session.laps.pick_quicklaps()
+    laps = session.laps.pick_quicklaps().copy()
     if laps.empty:
         print("⚠ No fast laps available in this session.")
         return None
@@ -78,7 +78,8 @@ def generate_laptime_distribution_image(session) -> str:
     sns.violinplot(
         data=laps,
         x='Driver', y='LapTimeSeconds', ax=ax,
-        inner='quartile', scale='width', linewidth=2,
+        hue='Driver', legend=False,
+        inner='quartile', density_norm='width', linewidth=2,
         palette=palette, order=driver_codes
     )
     plt.xticks(rotation=45, fontsize=14)
