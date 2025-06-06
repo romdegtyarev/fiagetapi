@@ -13,7 +13,10 @@ IMAGE_EXISTS=$(docker images -q "$IMAGE_NAME")
 
 if [ -z "$IMAGE_EXISTS" ]; then
   echo "❌ Image '$IMAGE_NAME' not found. Building..."
-  docker build -t "$IMAGE_NAME" -f "$DOCKERFILE" .
+  if ! docker build -t "$IMAGE_NAME" -f "$DOCKERFILE" . > /dev/null; then
+    echo "❌ Build failed!"
+    exit 1
+  fi
 else
   echo "✅ Image '$IMAGE_NAME' exists."
 fi

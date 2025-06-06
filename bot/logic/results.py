@@ -105,7 +105,7 @@ def generate_results_image(session) -> str:
         table.get_celld()[key].set_linewidth(1.2)
 
     filename = make_data_filename("result", session)
-    fig.tight_layout(pad=0.3)
+    fig.subplots_adjust(left=0.15, right=0.85, top=0.96, bottom=0.04)
     fig.savefig(filename, bbox_inches='tight', dpi=180, facecolor="#181a20")
     plt.close(fig)
     return filename
