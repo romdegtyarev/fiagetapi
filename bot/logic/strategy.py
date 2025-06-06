@@ -1,7 +1,7 @@
-import os
 import matplotlib.pyplot as plt
 from fastf1 import plotting
 from fastf1.plotting import get_compound_color
+from logic.utils import make_data_filename
 
 
 def generate_strategy_image(session) -> str:
@@ -18,7 +18,6 @@ def generate_strategy_image(session) -> str:
     stint_info = stints.groupby(["Driver", "Stint", "Compound"])['LapNumber'].agg(['min', 'max', 'count']).reset_index()
     stint_info = stint_info.rename(columns={'count': 'StintLength', 'min': 'StartLap', 'max': 'EndLap'})
     drivers = stint_info["Driver"].unique()
-
     fig, ax = plt.subplots(figsize=(14, len(drivers) * 0.6 + 2))
     for i, drv in enumerate(drivers):
         stints = stint_info[stint_info["Driver"] == drv]
@@ -50,8 +49,7 @@ def generate_strategy_image(session) -> str:
         plt.Rectangle((0, 0), 1, 1, color=get_compound_color(comp, session), label=comp)
         for comp in compounds
     ]
-    ax.legend(handles=legend_handles, title="Compound", bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=12)
-
+    ax.legend(handles=legend_handles, title="Compound", bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=14)
     ax.invert_yaxis()
     ax.set_xlabel("Lap", fontsize=16)
     ax.set_ylabel("Driver", fontsize=16)
@@ -60,13 +58,7 @@ def generate_strategy_image(session) -> str:
     ax.grid(True, axis='x', alpha=0.3, linestyle='--')
     plt.tight_layout()
 
-    event = session.event
-    year = event['EventDate'].year
-    gp = event['EventName'].replace(' ', '_')
-    type = session.name.replace(' ', '_')
-    filename = f"data/strategy_{year}_{gp}_{type}.png"
-
-    os.makedirs("data", exist_ok=True)
+    filename = make_data_filename("strategy", session)
     fig.savefig(filename, bbox_inches='tight', dpi=180)
     plt.close(fig)
     return filename

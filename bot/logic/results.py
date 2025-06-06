@@ -1,8 +1,8 @@
-import os
 import re
 import fastf1
 import matplotlib.pyplot as plt
 import pandas as pd
+from logic.utils import safe_name, make_data_filename
 
 
 DRIVER_TRANSLATION = {
@@ -28,10 +28,6 @@ DRIVER_TRANSLATION = {
     "Nico Hulkenberg": "Нико Хюлькенберг",
     "Gabriel Bortoleto": "Габриэль Бортолето",
 }
-
-
-def safe_name(s: str) -> str:
-    return re.sub(r'\W+', '_', s)
 
 
 def print_results(session) -> None:
@@ -62,26 +58,54 @@ def generate_results_image(session) -> str:
         print("⚠ No session results available.")
         return None
 
-    fig, ax = plt.subplots(figsize=(6, len(results) * 0.4))
-    table = ax.table(
-        cellText=results[['Position', 'FullName', 'TeamName', 'GridPosition', 'Points', 'Status']].values,
-        colLabels=['Pos', 'Driver', 'Team', 'Grid', 'Pts', 'Status'],
-        loc='center'
-    )
-    table.auto_set_font_size(False)
-    table.set_fontsize(8)
-    table.scale(1, 1.2)
+    columns = ['Position', 'FullName', 'TeamName', 'GridPosition', 'Points', 'Status']
+    data = results[columns].astype(str).values.tolist()
+    col_labels = ['Pos', 'Driver', 'Team', 'Grid', 'Pts', 'Status']
 
+    n_rows = len(data)
+    n_cols = len(col_labels)
+    cell_height = 0.5
+    cell_width = 2.0
+
+    fig_width = n_cols * cell_width
+    fig_height = max(4, n_rows * cell_height * 0.9)
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     ax.axis('off')
 
-    event = session.event
-    year = event['EventDate'].year
-    gp = safe_name(event['EventName'])
-    type_name = safe_name(session.name)
-    filename = f"data/result_{year}_{gp}_{type_name}.png"
+    header_color = "#24262b"
+    cell_color = "#181a20"
+    edge_color = "#444444"
+    font_color = "#f3f3f3"
+    header_font_color = "#ffe080"
 
-    os.makedirs("data", exist_ok=True)
-    fig.savefig(filename)
+    table = ax.table(
+        cellText=data,
+        colLabels=col_labels,
+        cellLoc='center',
+        loc='center'
+    )
+
+    table.auto_set_font_size(False)
+    table.set_fontsize(12)
+    table.scale(1.1, 1.15)
+
+    for (row, col), cell in table.get_celld().items():
+        cell.set_edgecolor(edge_color)
+        if row == 0:
+            cell.set_facecolor(header_color)
+            cell.set_text_props(weight='bold', color=header_font_color)
+            cell.set_height(cell_height * 0.9)
+        else:
+            cell.set_facecolor(cell_color)
+            cell.set_text_props(color=font_color)
+            cell.set_height(cell_height * 0.9)
+    for key in table.get_celld():
+        table.get_celld()[key].set_linewidth(1.2)
+
+    filename = make_data_filename("result", session)
+    fig.tight_layout(pad=0.3)
+    fig.savefig(filename, bbox_inches='tight', dpi=180, facecolor="#181a20")
     plt.close(fig)
     return filename
 
@@ -113,11 +137,6 @@ def export_results_csv(session) -> str:
         return None
 
     event = session.event
-    year = event['EventDate'].year
-    gp = safe_name(event['EventName'])
-    type_name = safe_name(session.name)
-    filename = f"data/result_{year}_{gp}_{type_name}.csv"
-
     sprint_data = {}
     try:
         gp_event = event['EventName']
@@ -158,6 +177,6 @@ def export_results_csv(session) -> str:
     df[race_col_name] = pd.Categorical(df[race_col_name], categories=driver_order, ordered=True)
     df = df.sort_values(by=race_col_name, kind='stable').reset_index(drop=True)
 
-    os.makedirs("data", exist_ok=True)
+    filename = make_data_filename("result", session, "csv")
     df.to_csv(filename, index=False, encoding='utf-8-sig')
     return filename
