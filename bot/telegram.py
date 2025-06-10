@@ -43,13 +43,13 @@ async def on_startup(bot):
 async def cmd_start(message: types.Message):
     await message.answer(
         "Привет! Я F1 бот. Доступные команды:\n"
-        "/best_laps <год> <gp> <тип>\n"
-        "/results <год> <gp> <тип>\n"
-        "/position_changes <год> <gp> <тип>\n"
-        "/strategy <год> <gp> <тип>\n"
-        "/driver_styling <год> <gp> <тип> <driver>\n"
-        "Пример: /best_laps 2024 Monaco R\n"
-        "Для driver_styling: /driver_styling 2024 Monaco R LEC\n"
+        "best_laps <год> <gp> <тип>\n"
+        "results <год> <gp> <тип>\n"
+        "position_changes <год> <gp> <тип>\n"
+        "strategy <год> <gp> <тип>\n"
+        "driver_styling <год> <gp> <тип> <driver>\n"
+        "Пример: best_laps 2024 Monaco R\n"
+        "Для driver_styling: driver_styling 2024 Monaco R LEC\n"
     )
 
 
