@@ -123,8 +123,8 @@ async def best_laps_cmd(message: types.Message):
             session = load_session(year, gp, sess_type)
             path1 = generate_best_laps_image(session)
             path2 = generate_laptime_distribution_image(session)
-            await msg.answer_photo(FSInputFile(path1), caption="Best Laps")
-            await msg.answer_photo(FSInputFile(path2), caption="Laptime Distribution")
+            await msg.answer_document(FSInputFile(path1), caption="Best Laps")
+            await msg.answer_document(FSInputFile(path2), caption="Laptime Distribution")
         except Exception as e:
             await msg.answer(f"Ошибка: {e}")
     await check_and_run(handler, message)
@@ -136,7 +136,7 @@ async def results_cmd(message: types.Message):
         try:
             session = load_session(year, gp, sess_type)
             path = generate_results_image(session)
-            await msg.answer_photo(FSInputFile(path), caption="Session Results")
+            await msg.answer_document(FSInputFile(path), caption="Session Results")
             csv_path = export_results_csv(session)
             await msg.answer_document(FSInputFile(csv_path), caption="CSV")
         except Exception as e:
@@ -150,7 +150,7 @@ async def position_cmd(message: types.Message):
         try:
             session = load_session(year, gp, sess_type)
             path = generate_position_changes_image(session)
-            await msg.answer_photo(FSInputFile(path), caption="Position Changes")
+            await msg.answer_document(FSInputFile(path), caption="Position Changes")
         except Exception as e:
             await msg.answer(f"Ошибка: {e}")
     await check_and_run(handler, message)
@@ -162,7 +162,7 @@ async def strategy_cmd(message: types.Message):
         try:
             session = load_session(year, gp, sess_type)
             path = generate_strategy_image(session)
-            await msg.answer_photo(FSInputFile(path), caption="Tire Strategy")
+            await msg.answer_document(FSInputFile(path), caption="Tire Strategy")
         except Exception as e:
             await msg.answer(f"Ошибка: {e}")
     await check_and_run(handler, message)
@@ -174,7 +174,7 @@ async def driver_styling_cmd(message: types.Message):
         try:
             session = load_session(year, gp, sess_type)
             path = generate_driver_styling_image(session, driver)
-            await msg.answer_photo(FSInputFile(path), caption=f"Driver {driver} Lap Styling")
+            await msg.answer_document(FSInputFile(path), caption=f"Driver {driver} Lap Styling")
         except Exception as e:
             await msg.answer(f"Ошибка: {e}")
     await check_and_run(handler, message, need_driver=True)
