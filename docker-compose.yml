@@ -20,8 +20,8 @@ services:
     depends_on:
       - racepagebotdb
     volumes:
-      - ./data:/app/data
-      - ./fastf1_cache:/root/.cache/fastf1
+      - /home/webuser/racepagebot/data:/app/data
+      - /home/webuser/racepagebot/cache:/root/.cache/fastf1
     env_file:
       - .env
     command: ["python", "bot/telegram.py"]
@@ -32,4 +32,4 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: './postgresdata'
+      device: '/home/webuser/racepagebot/postgresdata'
